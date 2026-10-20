@@ -287,6 +287,7 @@ describe("readScheduledTaskCommand", () => {
     '"%NODE_EXE%" gateway.js < NUL',
     "node gateway.js !WORKSPACE! < NUL",
     'cd /d "%WORKSPACE%"\r\nnode gateway.js < NUL',
+    'cd /d ""\r\nnode gateway.js',
   ])("rejects an ambiguous effective launcher body: %s", async (body) => {
     const env = await writeScheduledTaskScript([body]);
     await expect(readScheduledTaskCommand(env, { requireEffective: true })).rejects.toThrow(
@@ -408,6 +409,13 @@ describe("readScheduledTaskCommand", () => {
         OPENCLAW_WINDOWS_TASK_NAME: "OpenClaw Gateway Backup",
       }),
     ).rejects.toThrow(inspectionError);
+  });
+
+  it("preserves empty quoted launcher arguments without shifting later arguments", async () => {
+    const env = await writeScheduledTaskScript(['node gateway.js --label "" --port 18789']);
+    expect(
+      (await readScheduledTaskCommand(env, { requireEffective: true }))?.programArguments,
+    ).toEqual(["node", "gateway.js", "--label", "", "--port", "18789"]);
   });
 
   it.each([

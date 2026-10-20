@@ -13,6 +13,8 @@ export function splitArgsPreservingQuotes(
 ): string[] {
   const args: string[] = [];
   let current = "";
+  // An opened quote starts an argument even when it stays empty (`--label ""`).
+  let started = false;
   let quoteChar: ArgSplitQuoteChar | null = null;
   const escapeMode = options?.escapeMode ?? "none";
   const quoteChars = new Set<ArgSplitQuoteChar>(options?.quoteChars ?? ['"']);
@@ -40,19 +42,21 @@ export function splitArgsPreservingQuotes(
       const canOpenQuote = quoteStart === "anywhere" || current.length === 0;
       if (!quoteChar && canOpenQuote) {
         quoteChar = char as ArgSplitQuoteChar;
+        started = true;
         continue;
       }
     }
     if (!quoteChar && /\s/.test(char)) {
-      if (current) {
+      if (current || started) {
         args.push(current);
         current = "";
+        started = false;
       }
       continue;
     }
     current += char;
   }
-  if (current) {
+  if (current || started) {
     args.push(current);
   }
   return args;

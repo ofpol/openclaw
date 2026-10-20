@@ -23,6 +23,8 @@ describe("cmd argv helpers", () => {
       "!token!",
       "--quoted",
       'he said "hi"',
+      "",
+      "--after-empty",
     ];
     const encoded = args.map((arg) => quoteCmdScriptArg(arg)).join(" ");
     expect(parseCmdScriptCommandLine(encoded)).toEqual(args);

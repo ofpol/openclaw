@@ -444,7 +444,9 @@ async function readWindowsTaskCommand(
         const cdArguments = parseCmdScriptCommandLine(line);
         if (
           requireEffective &&
-          (stripTrailingCmdRedirections(line) !== line || cdArguments.length !== 3)
+          (stripTrailingCmdRedirections(line) !== line ||
+            cdArguments.length !== 3 ||
+            !cdArguments[2])
         ) {
           throw new Error("Ambiguous Scheduled Task working directory");
         }

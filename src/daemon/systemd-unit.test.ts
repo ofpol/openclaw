@@ -62,10 +62,12 @@ it("round-trips escaped and quoted ExecStart arguments", () => {
 });
 
 it("quotes empty ExecStart arguments without shifting later arguments", () => {
+  const programArguments = ["/usr/bin/node", "gateway", "--label", "", "--port", "18789", ""];
   const unit = buildSystemdUnit({
-    programArguments: ["/usr/bin/node", "gateway", "--label", "", "--port", "18789", ""],
+    programArguments,
   });
   expect(execStart(unit)).toBe('/usr/bin/node gateway --label "" --port 18789 ""');
+  expect(parseSystemdExecStart(execStart(unit))).toEqual(programArguments);
 });
 
 it("preserves explicit NODE_OPTIONS while omitting other empty values", () => {
@@ -145,6 +147,9 @@ it("splits command arguments using the platform's escaping rules", () => {
       "backslash-quote-only",
       ["openclaw", "--label", 'My "Quoted" Name'],
     ],
+    ['x "" "y"', "none", ["x", "", "y"]],
+    ['--label ""', "none", ["--label", ""]],
+    ['x "" ', "none", ["x", ""]],
   ] as const;
   for (const [input, escapeMode, expected] of cases) {
     expect(
